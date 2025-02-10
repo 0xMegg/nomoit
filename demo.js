@@ -5,6 +5,9 @@ const qs = require("qs");
 const axios = require("axios");
 const app = express();
 const port = 4000;
+// 테스트1
+// const client_id = "156cf43cbe6afc85f78e34a01ee61603";
+// 테스트2
 const client_id = "f01ddcc22c75e196fe7a3d380042b70a";
 const redirect_uri = "http://localhost:4000/redirect";
 const token_uri = "https://kauth.kakao.com/oauth/token";
@@ -120,19 +123,24 @@ app.get("/message", async function (req, res) {
 
 app.get("/friends_message", async function (req, res) {
   const uri = api_host + "/v1/api/talk/friends/message/default/send";
+  console.log(req.query);
   let { uuids } = req.query;
+  // uuids 문자열을 배열로 변환
+  const uuidArray = uuids
+    .split(",")
+    .map((uuid) => uuid.replace(/"/g, "").trim());
+
   const param = qs.stringify({
-    receiver_uuids: "[" + uuids + "]",
-    template_object:
-      "{" +
-      '"object_type": "text",' +
-      '"text": "텍스트 영역입니다. 최대 200자 표시 가능합니다.",' +
-      '"link": {' +
-      '    "web_url": "https://developers.kakao.com",' +
-      '    "mobile_web_url": "https://developers.kakao.com"' +
-      "}," +
-      '"button_title": "바로 확인"' +
-      "}",
+    receiver_uuids: JSON.stringify(uuidArray),
+    template_object: JSON.stringify({
+      object_type: "text",
+      text: "텍스트 영역입니다. 최대 200자 표시 가능합니다.",
+      link: {
+        web_url: "https://developers.kakao.com",
+        mobile_web_url: "https://developers.kakao.com",
+      },
+      button_title: "바로 확인",
+    }),
   });
   const header = {
     "content-Type": "application/x-www-form-urlencoded",
